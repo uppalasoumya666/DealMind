@@ -1,21 +1,34 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
+import LogoModal from './components/LogoModal';
+import AuthPage from './pages/AuthPage';
 import Dashboard from './pages/Dashboard';
 import DealDetails from './pages/DealDetails';
 import ConversationAnalyzer from './pages/ConversationAnalyzer';
 import MemoryTimelinePage from './pages/MemoryTimelinePage';
 import BeforeAfterComparison from './components/BeforeAfterComparison';
-import { api } from './services/api';
+import { api, DEFAULT_DEALS, DEFAULT_STATS } from './services/api';
 
 export default function App() {
+  // Authentication State
+  const [currentUser, setCurrentUser] = useState(() => {
+    try {
+      const saved = localStorage.getItem('dealmind_user');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
+
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [deals, setDeals] = useState([]);
-  const [stats, setStats] = useState({});
+  const [deals, setDeals] = useState(DEFAULT_DEALS);
+  const [stats, setStats] = useState(DEFAULT_STATS);
   const [selectedDealId, setSelectedDealId] = useState('deal-acme-01');
   const [healthInfo, setHealthInfo] = useState(null);
   const [initialScenario, setInitialScenario] = useState('day10');
   const [latestAnalysis, setLatestAnalysis] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isLogoModalOpen, setIsLogoModalOpen] = useState(false);
 
   // Initial data loading
   useEffect(() => {
@@ -26,12 +39,14 @@ export default function App() {
           api.getDeals(),
         ]);
         setHealthInfo(healthRes);
-        if (dealsRes?.deals) {
+        if (dealsRes?.deals && dealsRes.deals.length > 0) {
           setDeals(dealsRes.deals);
-          setStats(dealsRes.stats || {});
+          setStats(dealsRes.stats || DEFAULT_STATS);
         }
       } catch (err) {
-        console.error('Failed to load initial data:', err);
+        console.warn('Initial data loading using fallback deals:', err);
+        setDeals(DEFAULT_DEALS);
+        setStats(DEFAULT_STATS);
       } finally {
         setLoading(false);
       }
@@ -39,7 +54,8 @@ export default function App() {
     loadData();
   }, []);
 
-  const selectedDeal = deals.find((d) => d.id === selectedDealId) || deals[0] || null;
+  // Safe deal selection fallback: never null
+  const selectedDeal = deals.find((d) => d.id === selectedDealId) || deals[0] || DEFAULT_DEALS[0];
 
   const handleSelectDeal = (deal) => {
     setSelectedDealId(deal.id);
@@ -51,6 +67,11 @@ export default function App() {
     setActiveTab('analyzer');
   };
 
+  const handleNavigateToTimeline = (targetDealId = 'deal-acme-01') => {
+    setSelectedDealId(targetDealId);
+    setActiveTab('timeline');
+  };
+
   const handleLoadScenario = (scenarioKey) => {
     setSelectedDealId('deal-acme-01');
     setInitialScenario(scenarioKey);
@@ -59,14 +80,28 @@ export default function App() {
 
   const handleAnalysisComplete = (analysisData) => {
     setLatestAnalysis(analysisData);
-    // Refresh deals list to sync updated timeline and risk score
     api.getDeals().then((res) => {
       if (res?.deals) {
         setDeals(res.deals);
-        setStats(res.stats || {});
+        setStats(res.stats || DEFAULT_STATS);
       }
     });
   };
+
+  const handleLoginSuccess = (user) => {
+    setCurrentUser(user);
+    setActiveTab('dashboard');
+  };
+
+  const handleSignOut = () => {
+    localStorage.removeItem('dealmind_user');
+    setCurrentUser(null);
+  };
+
+  // If user is not authenticated, render AuthPage before Dashboard
+  if (!currentUser) {
+    return <AuthPage onLoginSuccess={handleLoginSuccess} />;
+  }
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
@@ -75,6 +110,16 @@ export default function App() {
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         healthInfo={healthInfo}
+        onOpenLogoModal={() => setIsLogoModalOpen(true)}
+        currentUser={currentUser}
+        onSignOut={handleSignOut}
+      />
+
+      {/* Interactive Logo Modal (opens when clicking logo in Navbar) */}
+      <LogoModal
+        isOpen={isLogoModalOpen}
+        onClose={() => setIsLogoModalOpen(false)}
+        onNavigateDashboard={() => setActiveTab('dashboard')}
       />
 
       {/* Main Content Area */}
@@ -99,8 +144,11 @@ export default function App() {
             {activeTab === 'deal-details' && (
               <DealDetails
                 deal={selectedDeal}
+                deals={deals}
+                onSelectDeal={handleSelectDeal}
                 onBack={() => setActiveTab('dashboard')}
                 onNavigateToAnalyzer={handleNavigateToAnalyzer}
+                onNavigateToTimeline={handleNavigateToTimeline}
               />
             )}
 

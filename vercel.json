@@ -1,0 +1,7 @@
+{
+  "buildCommand": "npm --prefix DealMind/frontend run build",
+  "outputDirectory": "DealMind/frontend/dist",
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/" }
+  ]
+}
