@@ -7,3 +7,5 @@ Full source code and application are located in [`DealMind/`](./DealMind/):
 - **Frontend:** [`DealMind/frontend`](./DealMind/frontend) (React 18 + Vite + Tailwind CSS + Lucide React)
 
 Refer to the main [DealMind README](./DealMind/README.md) for full architecture, installation, Hindsight setup, and demo instructions.
+
+Deployment update
