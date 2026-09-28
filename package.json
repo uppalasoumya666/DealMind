@@ -1,0 +1,14 @@
+{
+  "name": "dealmind-workspace",
+  "version": "1.0.0",
+  "description": "DealMind — AI Deal Intelligence Agent",
+  "private": true,
+  "scripts": {
+    "start:backend": "npm --prefix DealMind/backend start",
+    "start:frontend": "npm --prefix DealMind/frontend run preview",
+    "dev:backend": "npm --prefix DealMind/backend run dev",
+    "dev:frontend": "npm --prefix DealMind/frontend run dev",
+    "build:frontend": "npm --prefix DealMind/frontend run build",
+    "test:backend": "npm --prefix DealMind/backend test"
+  }
+}
