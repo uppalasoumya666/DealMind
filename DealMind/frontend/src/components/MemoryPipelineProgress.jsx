@@ -25,7 +25,7 @@ export default function MemoryPipelineProgress({ currentStep, statusMessage, rec
       title: 'AI Analysis & Extraction',
       desc: 'Isolate requirements, pricing & deadlines',
       icon: Brain,
-      activeWhen: [1, 2],
+      activeWhen: [2],
       doneWhen: [3, 4, 5, 6, 7],
     },
     {
@@ -33,7 +33,7 @@ export default function MemoryPipelineProgress({ currentStep, statusMessage, rec
       title: 'Hindsight RETAIN',
       desc: 'Persist facts into cloud memory bank',
       icon: Database,
-      activeWhen: [2, 3],
+      activeWhen: [3],
       doneWhen: [4, 5, 6, 7],
     },
     {
@@ -41,16 +41,16 @@ export default function MemoryPipelineProgress({ currentStep, statusMessage, rec
       title: 'Hindsight RECALL',
       desc: recalledCount > 0 ? `${recalledCount} memories recalled` : 'Retrieve historical deal context',
       icon: Search,
-      activeWhen: [4, 5],
-      doneWhen: [6, 7],
+      activeWhen: [4],
+      doneWhen: [5, 6, 7],
     },
     {
       id: 5,
       title: 'Compounding Risk Analysis',
       desc: 'Synthesize past objections with current signals',
       icon: ShieldAlert,
-      activeWhen: [5, 6],
-      doneWhen: [7],
+      activeWhen: [5],
+      doneWhen: [6, 7],
     },
     {
       id: 6,

@@ -90,6 +90,8 @@ export default function ConversationAnalyzer({
     }
   };
 
+  const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
   // Run the full analysis pipeline with progressive status animation
   const handleAnalyze = async () => {
     if (!transcript.trim()) {
@@ -101,28 +103,35 @@ export default function ConversationAnalyzer({
     setError(null);
     setAnalysisResult(null);
 
-    // Step 1: Analyzing conversation...
-    setPipelineStep(1);
-    setStatusMessage('Analyzing conversation with AI...');
-
     try {
-      // Step 2: Retaining memory...
-      setTimeout(() => {
-        setPipelineStep(2);
-        setStatusMessage('Retaining extracted facts in Hindsight Cloud...');
-      }, 700);
+      // Step 1: Ingestion
+      setPipelineStep(1);
+      setStatusMessage('Ingesting & parsing sales interaction transcript...');
+      await delay(350);
 
-      // Step 3: Recalling relevant memories...
-      setTimeout(() => {
-        setPipelineStep(4);
-        setStatusMessage('Recalling relevant historical memories from Hindsight...');
-      }, 1500);
+      // Step 2: Extraction
+      setPipelineStep(2);
+      setStatusMessage('Extracting key requirements, pricing terms & deadlines with AI...');
+      await delay(400);
 
-      // Step 4: Generating recommendation...
-      setTimeout(() => {
-        setPipelineStep(6);
-        setStatusMessage('Synthesizing memories and generating risk recommendation...');
-      }, 2300);
+      // Step 3: Retaining memory into Hindsight Cloud
+      setPipelineStep(3);
+      setStatusMessage('Retaining extracted facts in Hindsight Cloud bank...');
+      await delay(400);
+
+      // Step 4: Recalling relevant historical memories
+      setPipelineStep(4);
+      setStatusMessage('Recalling relevant historical memories from Hindsight...');
+      await delay(400);
+
+      // Step 5: Compounding Risk Analysis
+      setPipelineStep(5);
+      setStatusMessage('Synthesizing compounding risk across historical touchpoints...');
+      await delay(400);
+
+      // Step 6: Recommendation Engine
+      setPipelineStep(6);
+      setStatusMessage('Generating strategic action and counter-objection talking points...');
 
       // Perform backend or client-side fallback API call
       const response = await api.analyzeConversation({
@@ -132,7 +141,9 @@ export default function ConversationAnalyzer({
         speaker,
       });
 
-      // Pipeline complete
+      await delay(300);
+
+      // Step 7: Pipeline completely finished
       setPipelineStep(7);
       setStatusMessage('Analysis complete!');
       setAnalysisResult(response);
@@ -141,17 +152,20 @@ export default function ConversationAnalyzer({
         onAnalysisComplete(response);
       }
     } catch (err) {
-      console.error('Analysis error, recovering with DealMind engine:', err);
-      // Fallback guarantees it never fails
-      const fallback = await api.analyzeConversation({
-        conversationText: transcript,
-        dealId: currentDeal.id,
-        day: activeDay,
-        speaker,
-      });
-      setPipelineStep(7);
-      setStatusMessage('Analysis complete!');
-      setAnalysisResult(fallback);
+      console.warn('Analysis caught error, recovering with DealMind engine fallback:', err);
+      try {
+        const fallback = await api.analyzeConversation({
+          conversationText: transcript,
+          dealId: currentDeal.id,
+          day: activeDay,
+          speaker,
+        });
+        setPipelineStep(7);
+        setStatusMessage('Analysis complete!');
+        setAnalysisResult(fallback);
+      } catch (fallbackErr) {
+        setError('Analysis encountered an issue. Please try again.');
+      }
     } finally {
       setIsAnalyzing(false);
     }

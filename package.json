@@ -4,6 +4,8 @@
   "description": "DealMind — AI Deal Intelligence Agent",
   "private": true,
   "scripts": {
+    "build": "npm --prefix DealMind/frontend install && npm --prefix DealMind/frontend run build",
+    "start": "npm --prefix DealMind/backend start",
     "start:backend": "npm --prefix DealMind/backend start",
     "start:frontend": "npm --prefix DealMind/frontend run preview",
     "dev:backend": "npm --prefix DealMind/backend run dev",
